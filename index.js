@@ -10,8 +10,6 @@ const PG_SCHEMA = "stock"
 const TABLE_TRANSER_ORDER = 'transfer_order'
 const TABLE_TRANSER_ORDER_ITEM = 'transfer_order_item'
 const TABLE_TRANSFER_ORDER_ITEM_DETAIL = 'transfer_order_item_detail'
-const TABLE_STOCK_ITEM = 'stock_item'
-const TABLE_STOCK_LOT = 'stock_lot'
 
 let docClient = new AWS.DynamoDB.DocumentClient();
 const pool = new Pool();
@@ -108,6 +106,10 @@ exports.handler = async (event, context) => {
     }
 
     const response = {
+        headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*"
+        },
         statusCode: 200,
         body: JSON.stringify(responsePDF),
     };
@@ -115,30 +117,6 @@ exports.handler = async (event, context) => {
     return response;
 };
 
-
-function queryCheckStockLot(warehouseCode, productItemCode) {
-    const queryText = `select "expiredDate"
-    from ${PG_DB}.${PG_SCHEMA}.${TABLE_STOCK_LOT}
-    where "warehouseCode" = $1 and "productItemCode" = $2 and "quantity" != 0
-    order by "expiredDate" ,id asc;`
-    const query = {
-        text: queryText,
-        value: [warehouseCode, productItemCode]
-    }
-    return query
-}
-
-
-function queryStockItem(warehouse, productItemCode) {
-    const queryText = `select "binLocation"
-    from ${PG_DB}.${PG_SCHEMA}.${TABLE_STOCK_ITEM}
-    where "warehouseCode" = $1 and "productItemCode" = $2;`
-    const query = {
-        text: queryText,
-        value: [warehouse, productItemCode]
-    }
-    return query
-}
 
 function queryShippingOrderWithTrNumber(warehouse, trNumber) {
     const queryText = `select *
@@ -178,6 +156,10 @@ function doResponse(context, statusCode, err) {
         message: err.message || 'error'
     }
     const response = {
+        headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*"
+        },
         statusCode: statusCode,
         body: JSON.stringify(newError)
     }
