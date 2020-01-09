@@ -68,7 +68,7 @@ exports.handler = async (event, context) => {
             const { statusCode } = shippingOrderRes.rows[0]
 
             if(statusCode != 'SHI'){
-                throw { message: 'cannot get pdf purchase order.' }
+                throw { message: 'cannot get pdf shipping order.' }
             }
 
             // Get ShippingOrdersItem by user's warehouse and trNumber
