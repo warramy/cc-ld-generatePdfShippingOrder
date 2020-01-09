@@ -14,6 +14,7 @@ const TABLE_TRANSFER_ORDER_ITEM_DETAIL = 'transfer_order_item_detail'
 let docClient = new AWS.DynamoDB.DocumentClient();
 const pool = new Pool();
 const createPDF = require('./createPDF')
+const s3 = new AWS.S3();
 
 
 exports.handler = async (event, context) => {
@@ -67,7 +68,7 @@ exports.handler = async (event, context) => {
 
             const { statusCode } = shippingOrderRes.rows[0]
 
-            if(statusCode != 'SHI'){
+            if (statusCode != 'SHI') {
                 throw { message: 'cannot get pdf shipping order.' }
             }
 
@@ -94,13 +95,18 @@ exports.handler = async (event, context) => {
 
             const createPDFRes = await createPDF.genFilePDFAndUploadPDF(new_shippingOrderRes)
             console.log('createPDFRes => ', createPDFRes);
+
+            console.log('get Signed Url 180 sec.')
+            const url = await getSignedUrl(createPDFRes.key, 180)
+            console.log('url => ', url)
+
+
             //set response
             console.log("set response");
             responsePDF = {
-                fileUrl: createPDFRes.Location || '',
+                fileUrl: url || '',
                 key: createPDFRes.key || ''
             }
-
         }
 
     } catch (err) {
@@ -123,6 +129,19 @@ exports.handler = async (event, context) => {
     console.log("response: ", response);
     return response;
 };
+
+async function getSignedUrl(key, expires) {
+    const param = { Bucket: 'test.import.excel', Key: key, Expires: expires };
+    return new Promise(function (resolve, reject) {
+        s3.getSignedUrl('getObject', param, (err, url) => {
+            if (err) {
+                console.log('getSignedUrl error => ', err)
+                reject(err)
+            }
+            resolve(url);
+        })
+    });
+}
 
 
 function queryShippingOrderWithTrNumber(warehouse, trNumber) {
