@@ -64,6 +64,13 @@ exports.handler = async (event, context) => {
         if (shippingOrderRes.rowCount == 0) {
             throw { message: 'trNumber not found.' }
         } else {
+
+            const { statusCode } = shippingOrderRes.rows[0]
+
+            if(statusCode != 'SHI'){
+                throw { message: 'cannot get pdf purchase order.' }
+            }
+
             // Get ShippingOrdersItem by user's warehouse and trNumber
             console.log("query transfer_order_item by trNumber");
             const paramsShippingOrderItem = queryShippingOrderItemWithTrNumber(trNumber)
