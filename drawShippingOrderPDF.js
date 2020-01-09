@@ -428,12 +428,14 @@ function generateShippingOrderTable(doc, data) {
             shippingQuantity = data[i].shippingQuantity >= 0 ? data[i].shippingQuantity : shippingQuantity
         } else {
             shippingQuantity = data[i].quantity >= 0 ? data[i].quantity : shippingQuantity
-            if (data[i].expiredDate != '') {
+            if (data[i].expiredDate != null && data[i].expiredDate != '') {
                 const dateTimeStamp = Date.parse(data[i].expiredDate);
                 const d = new Date(dateTimeStamp);
                 expireDate = d.getDate() + '/' + (d.getMonth() + 1) + '/' + d.getFullYear()
-
+            }else{
+                expireDate = '-'
             }
+            
         }
 
         doc.text(`${seq}`, shipping_top_left_x, order_y, {
