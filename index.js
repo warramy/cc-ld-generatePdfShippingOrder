@@ -158,7 +158,8 @@ function queryShippingOrderWithTrNumber(warehouse, trNumber) {
 function queryShippingOrderItemWithTrNumber(trNumber) {
     const queryText = `select *
     from ${PG_DB}.${PG_SCHEMA}.${TABLE_TRANSER_ORDER_ITEM}
-    where "trNumber" = $1;`
+    where "trNumber" = $1
+    order by seq asc;`
     const query = {
         text: queryText,
         value: [trNumber]
